@@ -1,17 +1,14 @@
-
-// App.js (Updated)
+// App.js (Updated without AuthModal)
 import React, { useState } from 'react';
 import Navbar from './Components/Navbar';
-import AuthModal from './Components/AuthModal';
 import HeroSection from './Components/HeroSection';
 import DoctorsList from './Components/DoctorsList';
 import BlogsSection from './Components/BlogsSection';
 import ContactForm from './Components/ContactForm';
-import Footer from './Components/Footer';
+import Footer from './Components/Footer'; // Make sure to import Footer
 
 const App = () => {
   const [user, setUser] = useState(null);
-  const [showAuth, setShowAuth] = useState('');
   const [doctors] = useState([
     {
       _id: '1',
@@ -85,40 +82,11 @@ const App = () => {
   const [showAllBlogs, setShowAllBlogs] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Auth forms state
-  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [registerForm, setRegisterForm] = useState({ 
-    name: '', 
-    email: '', 
-    password: '', 
-    role: 'user' 
-  });
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
     message: ''
   });
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setUser({ name: loginForm.email.split('@')[0], email: loginForm.email });
-    setShowAuth('');
-    setLoginForm({ email: '', password: '' });
-    alert('Successfully logged in!');
-  };
-
-  const handleRegister = (e) => {
-    e.preventDefault();
-    setUser({ name: registerForm.name, email: registerForm.email });
-    setShowAuth('');
-    setRegisterForm({ name: '', email: '', password: '', role: 'user' });
-    alert('Successfully registered!');
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    alert('Successfully logged out!');
-  };
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
@@ -139,22 +107,9 @@ const App = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar 
         user={user}
-        showAuth={showAuth}
-        setShowAuth={setShowAuth}
-        handleLogout={handleLogout}
+        setUser={setUser}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
-      />
-      
-      <AuthModal
-        showAuth={showAuth}
-        setShowAuth={setShowAuth}
-        loginForm={loginForm}
-        setLoginForm={setLoginForm}
-        registerForm={registerForm}
-        setRegisterForm={setRegisterForm}
-        handleLogin={handleLogin}
-        handleRegister={handleRegister}
       />
 
       <HeroSection
@@ -172,8 +127,7 @@ const App = () => {
         showAllBlogs={showAllBlogs}
         setShowAllBlogs={setShowAllBlogs}
       />
-
-      <ContactForm
+   <ContactForm
         contactForm={contactForm}
         setContactForm={setContactForm}
         handleContactSubmit={handleContactSubmit}

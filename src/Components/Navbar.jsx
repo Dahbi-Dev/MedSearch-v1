@@ -4,7 +4,6 @@ import { Menu, X, User, Mail, Lock, UserPlus, LogIn, Eye, EyeOff, Stethoscope, M
 const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [currentView, setCurrentView] = useState('login');
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -26,15 +25,38 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
     city: ''
   });
 
-  // API base URL - change this to your actual backend URL
-  const API_BASE_URL = import.meta.env.VITE_API_URL;
+  // API base URL - fallback to localhost if env var not set
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+  // Token management functions
+  const getToken = () => {
+    try {
+      return localStorage.getItem('token');
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return null;
+    }
+  };
+
+  const setToken = (token) => {
+    try {
+      if (token) {
+        localStorage.setItem('token', token);
+      } else {
+        localStorage.removeItem('token');
+      }
+    } catch (error) {
+      console.error('Error setting token:', error);
+    }
+  };
 
   // Check for existing token on mount
   useEffect(() => {
-    if (token) {
-      fetchProfile();
+    const token = getToken();
+    if (token && !user) {
+      fetchProfile(token);
     }
-  }, [token]);
+  }, [user]);
 
   const apiCall = async (endpoint, options = {}) => {
     const url = `${API_BASE_URL}${endpoint}`;
@@ -53,12 +75,20 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
       
+      // Check if response is ok
       if (!response.ok) {
-        throw new Error(data.message || data.errors?.[0]?.msg || 'Request failed');
+        let errorMessage = 'Request failed';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.errors?.[0]?.msg || errorMessage;
+        } catch (e) {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
+      const data = await response.json();
       return data;
     } catch (error) {
       console.error('API Error:', error);
@@ -66,16 +96,20 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
     }
   };
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (token = null) => {
+    const authToken = token || getToken();
+    if (!authToken) return;
+
     try {
       const userData = await apiCall('/auth/profile', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${authToken}`
         }
       });
       setUser(userData);
     } catch (error) {
       console.error('Profile fetch error:', error);
+      // If token is invalid, clear it
       handleLogout();
     }
   };
@@ -136,9 +170,10 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
         body: loginForm
       });
       
-      const { token: newToken, user: userData } = response;
+      const { token, user: userData } = response;
       
-      setToken(newToken);
+      // Store token and user data
+      setToken(token);
       setUser(userData);
       setMessage('Login successful!');
       setShowAuthModal(false);
@@ -147,6 +182,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
       setLoginForm({ email: '', password: '' });
       
     } catch (error) {
+      console.error('Login error:', error);
       setErrors({ general: error.message || 'Login failed' });
     } finally {
       setLoading(false);
@@ -173,9 +209,10 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
         body: registerForm
       });
       
-      const { token: newToken, user: userData } = response;
+      const { token, user: userData } = response;
       
-      setToken(newToken);
+      // Store token and user data
+      setToken(token);
       setUser(userData);
       setMessage('Registration successful!');
       setShowAuthModal(false);
@@ -192,6 +229,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
       });
       
     } catch (error) {
+      console.error('Registration error:', error);
       setErrors({ general: error.message || 'Registration failed' });
     } finally {
       setLoading(false);
@@ -199,7 +237,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
   };
 
   const handleLogout = () => {
-    setToken(null);
+    setToken(null); // This will remove the token from localStorage
     setUser(null);
     setCurrentView('login');
     setMessage('');
@@ -221,7 +259,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
     setCurrentView(view);
     setShowAuthModal(true);
     clearErrors();
-    setMobileMenuOpen(false); // Close mobile menu when opening auth modal
+    setMobileMenuOpen(false);
   };
 
   const closeAuthModal = () => {
@@ -331,7 +369,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
 
       {/* Auth Modal */}
       {showAuthModal && (
-        <div className="fixed inset-0 bg-black bg-opacity- flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full max-w-md max-h-[90vh] overflow-y-auto">
             {/* Header with tabs */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
@@ -385,7 +423,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
               )}
 
               {currentView === 'login' ? (
-                <div className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-4">
                   <h3 className="text-xl font-bold text-gray-800 mb-4">Welcome Back</h3>
                   
                   <div>
@@ -400,6 +438,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                           errors.email ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Enter your email"
+                        required
                       />
                     </div>
                     {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
@@ -417,6 +456,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                           errors.password ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Enter your password"
+                        required
                       />
                       <button
                         type="button"
@@ -430,16 +470,15 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                   </div>
 
                   <button
-                    type="button"
-                    onClick={handleLogin}
+                    type="submit"
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
                   >
                     {loading ? 'Signing In...' : 'Sign In'}
                   </button>
-                </div>
+                </form>
               ) : (
-                <div className="space-y-4">
+                <form onSubmit={handleRegister} className="space-y-4">
                   <h3 className="text-xl font-bold text-gray-800 mb-4">Create Account</h3>
                   
                   <div>
@@ -454,6 +493,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                           errors.name ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Enter your full name"
+                        required
                       />
                     </div>
                     {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
@@ -471,6 +511,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                           errors.email ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Enter your email"
+                        required
                       />
                     </div>
                     {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
@@ -488,6 +529,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                           errors.password ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Enter your password"
+                        required
                       />
                       <button
                         type="button"
@@ -526,6 +568,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                               errors.specialty ? 'border-red-300' : 'border-gray-300'
                             }`}
                             placeholder="e.g., Cardiology, Dermatology"
+                            required={registerForm.role === 'doctor'}
                           />
                         </div>
                         {errors.specialty && <p className="mt-1 text-sm text-red-600">{errors.specialty}</p>}
@@ -544,6 +587,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                             }`}
                             placeholder="Years of experience"
                             min="0"
+                            required={registerForm.role === 'doctor'}
                           />
                         </div>
                         {errors.experience && <p className="mt-1 text-sm text-red-600">{errors.experience}</p>}
@@ -561,6 +605,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                               errors.city ? 'border-red-300' : 'border-gray-300'
                             }`}
                             placeholder="Your city"
+                            required={registerForm.role === 'doctor'}
                           />
                         </div>
                         {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
@@ -569,14 +614,13 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
                   )}
 
                   <button
-                    type="button"
-                    onClick={handleRegister}
+                    type="submit"
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
                   >
                     {loading ? 'Creating Account...' : 'Create Account'}
                   </button>
-                </div>
+                </form>
               )}
 
               <div className="mt-4 text-center text-sm text-gray-600">

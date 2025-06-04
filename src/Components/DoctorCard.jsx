@@ -195,11 +195,9 @@ const DoctorCard = ({ doctor }) => {
       <div className="px-6 pb-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5">
-            Book Appointment
+           Call Now
           </button>
-          <button className="flex-1 sm:flex-initial sm:px-6 py-3 px-4 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-all duration-200 hover:shadow-md">
-            View Profile
-          </button>
+          
         </div>
       </div>
 

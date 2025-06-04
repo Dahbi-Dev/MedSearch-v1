@@ -192,14 +192,22 @@ const DoctorCard = ({ doctor }) => {
       )}
 
       {/* Action Buttons */}
-      <div className="px-6 pb-6">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5">
-           Call Now
-          </button>
-          
-        </div>
-      </div>
+     <div className="px-6 pb-6">
+  <div className="flex flex-col sm:flex-row gap-3">
+    <button 
+      className="
+        flex-1 
+        bg-gradient-to-r from-blue-600 via-teal-500 to-green-600 
+        hover:from-blue-700 hover:via-teal-600 hover:to-green-700
+        text-white py-3 px-4 rounded-lg font-medium
+        transition-all duration-200 hover:shadow-md
+        transform hover:-translate-y-0.5
+      "
+    >
+      Call Now
+    </button>
+  </div>
+</div>
 
       {/* Hover Effect Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl"></div>

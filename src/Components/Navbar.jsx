@@ -284,7 +284,7 @@ const Navbar = ({ user, setUser, mobileMenuOpen, setMobileMenuOpen }) => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-blue-600">FindDoc</h1>
+                <h1 className="text-2xl font-bold text-blue-600">MedSearch</h1>
               </div>
             </div>
                      

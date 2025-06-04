@@ -211,15 +211,7 @@ const DoctorList = ({ doctors, loading, error, searchFilters, onClearSearch }) =
           </div>
         </div>
 
-        {/* Pagination Info */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="text-sm text-gray-600">
-            Showing {startIndex + 1}-{Math.min(endIndex, doctors.length)} of {doctors.length} doctors
-          </div>
-          <div className="text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
-          </div>
-        </div>
+        
 
         {/* Doctor Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 mb-12">
@@ -238,81 +230,64 @@ const DoctorList = ({ doctors, loading, error, searchFilters, onClearSearch }) =
         </div>
 
         {/* Enhanced Pagination */}
-        {totalPages > 1 && (
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              {/* Previous Button */}
+       {totalPages > 1 && (
+  <div className="bg-white rounded-2xl shadow-sm p-6">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Previous Button */}
+      <button
+        onClick={prevPage}
+        disabled={currentPage === 1}
+        className={`flex items-center px-6 py-3 rounded-lg font-medium transition-all ${
+          currentPage === 1
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-gradient-to-r from-blue-600 via-teal-500 to-green-600 hover:from-blue-700 hover:via-teal-600 hover:to-green-700 text-white shadow-md hover:shadow-lg'
+        }`}
+      >
+        <ChevronLeft className="h-4 w-4 mr-2" />
+        Previous
+      </button>
+
+      {/* Page Numbers */}
+      <div className="flex items-center gap-2">
+        {getPageNumbers().map((page, index) => (
+          <React.Fragment key={index}>
+            {page === '...' ? (
+              <span className="px-3 py-2 text-gray-400">...</span>
+            ) : (
               <button
-                onClick={prevPage}
-                disabled={currentPage === 1}
-                className={`flex items-center px-6 py-3 rounded-lg font-medium transition-all ${
-                  currentPage === 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
+                onClick={() => goToPage(page)}
+                className={`w-10 h-10 rounded-lg font-medium transition-all ${
+                  currentPage === page
+                    ? 'bg-gradient-to-r from-blue-600 via-teal-500 to-green-600 text-white shadow-md'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
               >
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                Previous
+                {page}
               </button>
-
-              {/* Page Numbers */}
-              <div className="flex items-center gap-2">
-                {getPageNumbers().map((page, index) => (
-                  <React.Fragment key={index}>
-                    {page === '...' ? (
-                      <span className="px-3 py-2 text-gray-400">...</span>
-                    ) : (
-                      <button
-                        onClick={() => goToPage(page)}
-                        className={`w-10 h-10 rounded-lg font-medium transition-all ${
-                          currentPage === page
-                            ? 'bg-blue-600 text-white shadow-md'
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-
-              {/* Next Button */}
-              <button
-                onClick={nextPage}
-                disabled={currentPage === totalPages}
-                className={`flex items-center px-6 py-3 rounded-lg font-medium transition-all ${
-                  currentPage === totalPages
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
-                }`}
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </button>
-            </div>
-
-            {/* Quick Jump */}
-            {totalPages > 5 && (
-              <div className="mt-6 pt-6 border-t border-gray-100 text-center">
-                <div className="flex items-center justify-center gap-2 text-sm">
-                  <span className="text-gray-600">Jump to page:</span>
-                  <select
-                    value={currentPage}
-                    onChange={(e) => goToPage(parseInt(e.target.value))}
-                    className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                      <option key={page} value={page}>
-                        Page {page}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
             )}
-          </div>
-        )}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Next Button */}
+      <button
+        onClick={nextPage}
+        disabled={currentPage === totalPages}
+        className={`flex items-center px-6 py-3 rounded-lg font-medium transition-all ${
+          currentPage === totalPages
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-gradient-to-r from-blue-600 via-teal-500 to-green-600 hover:from-blue-700 hover:via-teal-600 hover:to-green-700 text-white shadow-md hover:shadow-lg'
+        }`}
+      >
+        Next
+        <ChevronRight className="h-4 w-4 ml-2" />
+      </button>
+    </div>
+
+   
+  </div>
+)}
+
       </div>
 
       <style jsx>{`

@@ -3,19 +3,15 @@ import React, { useState } from 'react';
 const ContactForm = ({ contactForm, setContactForm, handleContactSubmit }) => {
   const [isSent, setIsSent] = useState(false); // état pour afficher le message
 
-  // Wrapper pour la soumission qui met à jour l'état isSent
   const onSubmit = async (e) => {
     e.preventDefault();
-    // Ici tu peux appeler ta fonction handleContactSubmit (qui doit gérer l'envoi)
-    // Exemple : await handleContactSubmit(e);
+    
     try {
       await handleContactSubmit(e); // si ta fonction est async
       setIsSent(true); // affichage du message succès
-      // Optionnel : vider le formulaire après envoi réussi
       setContactForm({ name: '', email: '', message: '' });
     } catch (error) {
       setIsSent(false);
-      // gérer l'erreur si besoin
     }
   };
 

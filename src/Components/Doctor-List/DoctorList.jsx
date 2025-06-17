@@ -160,7 +160,7 @@ const DoctorList = ({ doctors, loading, error, searchFilters, onClearSearch }) =
   }
 
   return (
-    <section id="doctors-section" className="py-16 bg-gradient-to-br from-gray-50 to-blue-50/30">
+    <section id="doctors-section" className="py-16 bg-gradient-to-brbg-white dark:bg-gradient-to-r dark:from-slate-900 dark:via-blue-900 dark:to-indigo-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Enhanced Header */}
         <div className="text-center mb-12">
